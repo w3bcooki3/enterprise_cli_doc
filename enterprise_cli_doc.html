@@ -1,0 +1,1887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecOps Command Center - Enterprise Security CLI Reference</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* --- Theme Variables (Dark Mode Default) --- */
+        :root {
+            --primary-blue: #1e3a8a;
+            --secondary-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --dark-bg: #0f172a;
+            --card-bg: #1e293b;
+            --border-color: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --code-bg: rgba(6, 182, 212, 0.1); /* For command code background */
+            --example-bg: #0f172a; /* For example pre blocks */
+            --footer-bg: #1e293b;
+            --footer-text: #cbd5e1;
+        }
+
+        /* --- Light Mode Variables --- */
+        body.light-mode {
+            --primary-blue: #2563eb;
+            --secondary-blue: #1d4ed8;
+            --accent-cyan: #0891b2;
+            --dark-bg: #f1f5f9; /* Light background */
+            --card-bg: #ffffff; /* White cards */
+            --border-color: #e2e8f0;
+            --text-primary: #1a202c; /* Dark text */
+            --text-secondary: #4a5568;
+            --text-muted: #718096;
+            --success: #059669;
+            --warning: #d97706;
+            --error: #dc2626;
+            --code-bg: rgba(6, 182, 212, 0.08); /* Lighter code background */
+            --example-bg: #f8fafc; /* Lighter example pre blocks */
+            --footer-bg: #e2e8f0;
+            --footer-text: #4a5568;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            transition: background 0.3s ease, color 0.3s ease; /* Smooth theme transition */
+        }
+
+        .main-container {
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, var(--card-bg) 100%);
+            position: relative;
+            padding-top: 20px; /* Space for theme toggle */
+        }
+
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(59, 130, 246, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59, 130, 246, 0.05) 1px, transparent 1px);
+            background-size: 20px 20px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* --- Theme Toggle Button --- */
+        .theme-toggle-container {
+            position: absolute;
+            top: 20px;
+            right: 24px;
+            z-index: 200; /* Ensure it's above other content */
+        }
+
+        .theme-toggle-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .theme-toggle-btn:hover {
+            background: var(--secondary-blue);
+            border-color: var(--secondary-blue);
+            color: white;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 40px 0;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .page-description {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+            max-width: 800px;
+        }
+
+        /* Global Search Input within Main Content */
+        .global-search-container {
+            position: relative;
+            width: 100%; /* Take full width */
+            max-width: 400px; /* Limit width */
+            margin-bottom: 30px; /* Space below it */
+        }
+
+        .global-search-input {
+            width: 100%;
+            padding: 12px 16px 12px 44px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .global-search-input:focus {
+            outline: none;
+            border-color: var(--secondary-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .global-search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 18px;
+        }
+
+
+        /* Filter Section */
+        .filter-section {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+
+        .filter-chip {
+            padding: 8px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .filter-chip:hover, .filter-chip.active {
+            background: var(--secondary-blue);
+            border-color: var(--secondary-blue);
+            color: white;
+        }
+
+        /* Vendor Grid */
+        .vendor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); 
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .vendor-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .vendor-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-blue), var(--accent-cyan));
+            transition: left 0.3s ease;
+        }
+
+        .vendor-card:hover::before {
+            left: 0;
+        }
+
+        .vendor-card:hover {
+            border-color: var(--secondary-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .vendor-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .vendor-logo {
+            width: 56px;
+            height: 56px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .vendor-info h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+
+        .vendor-category {
+            font-size: 12px;
+            padding: 4px 8px;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--secondary-blue);
+            border-radius: 4px;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .vendor-description {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        .vendor-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .stats-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .doc-link {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--accent-cyan);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .doc-link:hover {
+            color: var(--secondary-blue);
+        }
+
+        /* Commands Section */
+        .commands-section {
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .commands-section.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .commands-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .back-button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 10px 16px;
+            border-radius: 6px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .back-button:hover {
+            background: var(--secondary-blue);
+            border-color: var(--secondary-blue);
+            color: white;
+        }
+
+        .vendor-title {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .vendor-title h2 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        /* Command Categories */
+        .command-categories {
+            grid-template-columns: 1fr; /* Commands section always single column */
+            display: grid;
+            gap: 24px;
+        }
+
+        .category-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .category-header {
+            padding: 20px 24px;
+            background: rgba(59, 130, 246, 0.05);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .category-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .category-subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .commands-list {
+            padding: 0;
+        }
+
+        .command-item {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+            transition: background 0.2s ease;
+        }
+
+        .command-item:last-child {
+            border-bottom: none;
+        }
+
+        .command-item:hover {
+            background: rgba(59, 130, 246, 0.03);
+        }
+
+        .command-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .command-code {
+            font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+            font-size: 14px;
+            color: var(--accent-cyan);
+            background: var(--code-bg); /* Uses theme variable */
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+            flex-grow: 1;
+        }
+
+        .command-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn:hover {
+            background: var(--secondary-blue);
+            border-color: var(--secondary-blue);
+            color: white;
+        }
+
+        .command-description {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .command-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            font-size: 12px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-muted);
+        }
+
+        .detail-label {
+            font-weight: 500;
+        }
+
+        .detail-value {
+            color: var(--text-secondary);
+        }
+
+        /* Styles for Example Command and Output */
+        .example-section {
+            margin-top: 15px;
+            border-top: 1px dashed var(--border-color);
+            padding-top: 15px;
+        }
+
+        .example-section h4 {
+            font-size: 14px;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .example-section pre {
+            background-color: var(--example-bg); /* Uses theme variable */
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+            font-size: 13px;
+            color: var(--text-primary);
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .example-section pre.command-output {
+            color: var(--text-secondary); /* Adjusted for theme */
+            margin-top: 8px;
+        }
+
+        .toggle-example-btn {
+            background: var(--primary-blue);
+            border: 1px solid var(--primary-blue);
+            padding: 6px 12px;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+            margin-bottom: 10px;
+            transition: background 0.2s ease;
+        }
+
+        .toggle-example-btn:hover {
+            background: var(--secondary-blue);
+            border-color: var(--secondary-blue);
+        }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .vendor-grid {
+                grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); 
+            }
+            
+            .command-categories {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .global-search-container {
+                max-width: 100%; /* Full width on small screens */
+            }
+
+            .header-content {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-container {
+                width: 100%;
+            }
+            
+            .vendor-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .commands-header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+
+            .theme-toggle-container {
+                top: 10px;
+                right: 10px;
+            }
+        }
+
+        /* Utility Classes */
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-active {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .status-deprecated {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .privilege-admin {
+            color: var(--error);
+        }
+
+        .privilege-user {
+            color: var(--success);
+        }
+
+        /* --- Footer Styles --- */
+        .footer {
+            background-color: var(--footer-bg);
+            color: var(--footer-text);
+            padding: 20px 0;
+            text-align: center;
+            border-top: 1px solid var(--border-color);
+            margin-top: 40px;
+            font-size: 14px;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: center; /* Center items for a single row */
+            align-items: center;
+            gap: 30px; /* Space between items */
+            flex-wrap: wrap; /* Allow wrapping on small screens */
+        }
+
+        .footer-link {
+            color: var(--footer-text);
+            text-decoration: none;
+            transition: color 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .footer-link:hover {
+            color: var(--secondary-blue);
+        }
+
+        .footer-text {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .footer-text i, .footer-link i {
+            font-size: 16px;
+        }
+        /* Header */
+        .header {
+            padding: 40px 0;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary-blue), var(--accent-cyan));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 20px;
+            color: white;
+        }
+
+        .logo-text {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .tagline {
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .search-container {
+            position: relative;
+            width: 400px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px 12px 44px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--secondary-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 18px;
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="grid-overlay"></div>
+
+        <header class="header">
+            <div class="container">
+                <div class="header-content">
+                    <div class="logo-section">
+                        <div class="logo-icon">SC</div>
+                        <div>
+                            <div class="logo-text">SecOps Command Center</div>
+                            <div class="tagline">Enterprise Security CLI Reference & Learning Platform</div>
+                        </div>
+                    </div>
+                    <div class="header-actions">
+                        <div class="search-container">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" class="search-input" id="globalSearch" placeholder="Search commands, descriptions, or vendors...">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <div class="theme-toggle-container">
+            <button id="themeToggleBtn" class="theme-toggle-btn">
+                <i class="fas fa-moon" id="themeIcon"></i>
+                <span id="themeText">Dark Mode</span>
+            </button>
+        </div>
+
+        <main class="main-content">
+            <div class="container">
+                <div class="vendor-section" id="vendorSection">
+                    <h1 class="page-title">SecOps Command Center</h1>
+                    <p class="page-description">
+                        Comprehensive CLI documentation for enterprise security platforms. Each command includes detailed descriptions, 
+                        use cases, privilege requirements, and links to official vendor documentation for in-depth learning.
+                    </p>
+
+
+                    <div class="filter-section">
+                        <div class="filter-chip active" data-filter="all">All Platforms</div>
+                        <div class="filter-chip" data-filter="firewall">Next-Gen Firewalls</div>
+                        <div class="filter-chip" data-filter="endpoint">Endpoint Security</div>
+                        <div class="filter-chip" data-filter="siem">SIEM & Analytics</div>
+                        <div class="filter-chip" data-filter="network">Network Security</div>
+                        <div class="filter-chip" data-filter="cloud">Cloud Security</div>
+                    </div>
+
+                    <div class="vendor-grid" id="vendorGrid">
+                        </div>
+                </div>
+
+                <div class="commands-section" id="commandsSection">
+                    <div class="commands-header">
+                        <button class="back-button" onclick="showVendorSection()">
+                            <i class="fas fa-arrow-left"></i> Back to Platforms
+                        </button>
+                        <div class="vendor-title" id="currentVendorTitle">
+                            </div>
+                    </div>
+                    
+                    <div class="command-categories" id="commandCategories">
+                        </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <div class="container footer-content">
+                <span class="footer-text">
+                    Made with<i class="fas fa-heart"></i> by <a href="https://github.com/w3bcooki3">w3bcooki3</a>
+                </span>
+                <a href="#" class="footer-link">
+                    <i class="fas fa-code-branch"></i> Request Feature
+                </a>
+                <a href="#" class="footer-link">
+                    <i class="fas fa-ticket-alt"></i> Support Ticket
+                </a>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Comprehensive vendor and command data
+        const securityPlatforms = {
+            'palo-alto': {
+                name: 'Palo Alto Networks',
+                category: 'firewall',
+                description: 'Next-generation firewall and security platform with advanced threat prevention, URL filtering, and application control capabilities.',
+                logo_bg: 'linear-gradient(135deg, #FF6B35, #F7931E)',
+                documentation: 'https://docs.paloaltonetworks.com/pan-os',
+                command_count: 45,
+                category_count: 6,
+                commands: {
+                    'System Administration': {
+                        subtitle: 'Device management and system operations',
+                        commands: [
+                            {
+                                cmd: 'show system info',
+                                description: 'Displays comprehensive system information including hardware details, software version, uptime, and serial numbers. Essential for inventory management and troubleshooting.',
+                                privilege: 'User',
+                                category: 'Monitoring',
+                                status: 'Active',
+                                example: {
+                                    command: 'show system info',
+                                    output: `
+hostname: PA-FW-01
+ip-address: 192.168.1.254
+netmask: 255.255.255.0
+default-gateway: 192.168.1.1
+model: PA-220
+serial: 007569000000001
+uptime: 12 days, 03:45:22
+sw-version: 10.1.5
+`
+                                }
+                            },
+                            {
+                                cmd: 'show jobs all',
+                                description: 'Lists all currently running and queued system jobs including commit operations, content updates, and report generation tasks.',
+                                privilege: 'User',
+                                category: 'Monitoring',
+                                status: 'Active',
+                                example: {
+                                    command: 'show jobs all',
+                                    output: `
+ID Type Status Result Completed
+--------------------------------------------------------------------------------
+5 Commit FIN Active No 2023/10/26 10:30:15
+6 Content-update FIN Active Yes 2023/10/26 12:00:00
+7 Report-gen QUE Active No -
+`
+                                }
+                            },
+                            {
+                                cmd: 'request system restart',
+                                description: 'Initiates a graceful system restart. All active sessions will be terminated and the device will reboot completely.',
+                                privilege: 'Admin',
+                                category: 'Management',
+                                status: 'Active',
+                                example: {
+                                    command: 'request system restart',
+                                    output: `
+System will be restarted. Do you want to continue? (y/n)
+`
+                                }
+                            }
+                        ]
+                    },
+                    'Network Operations': {
+                        subtitle: 'Interface management and routing',
+                        commands: [
+                            {
+                                cmd: 'show interface all',
+                                description: 'Displays detailed information about all network interfaces including status, IP addresses, traffic statistics, and configuration details.',
+                                privilege: 'User',
+                                category: 'Monitoring',
+                                status: 'Active',
+                                example: {
+                                    command: 'show interface all',
+                                    output: `
+Name Link  State     Zone    IP-Address       Bytes-in      Bytes-out
+-------------------------------------------------------------------------------
+ethernet1/1 up    up       untrust 1.1.1.1/24       12345678      87654321
+ethernet1/2 up    up       trust   192.168.10.1/24  98765432      23456789
+loopback   up    up       -       10.0.0.1/32      0             0
+`
+                                }
+                            },
+                            {
+                                cmd: 'show routing route',
+                                description: 'Shows the complete routing table with destination networks, next hops, metrics, and route sources for troubleshooting connectivity issues.',
+                                privilege: 'User',
+                                category: 'Monitoring',
+                                status: 'Active',
+                                example: {
+                                    command: 'show routing route',
+                                    output: `
+Flags: A - Active, I - Inactive, C - Connected, S - Static, R - RIP, O - OSPF
+       B - BGP, * - candidate default
+
+Virtual Router: default
+Destination      Next-Hop         Metric  Type  Interface  Age
+-------------------------------------------------------------------------------
+C    192.168.10.0/24 directly connected 0      C      ethernet1/2 0
+S* 0.0.0.0/0      1.1.1.1          10     S      ethernet1/1 0
+`
+                                }
+                            },
+                            {
+                                cmd: 'test routing fib-lookup virtual-router default ip 8.8.8.8',
+                                description: 'Tests routing table lookup for a specific IP address to verify which interface and next-hop would be used for traffic forwarding.',
+                                privilege: 'User',
+                                category: 'Testing',
+                                status: 'Active',
+                                example: {
+                                    command: 'test routing fib-lookup virtual-router default ip 8.8.8.8',
+                                    output: `
+lookup IP 8.8.8.8 for virtual-router default:
+  Route: 0.0.0.0/0
+  Metric: 10
+  Interface: ethernet1/1
+  Next-Hop: 1.1.1.1
+`
+                                }
+                            }
+                        ]
+                    },
+                    'Security Policy Management': {
+                        subtitle: 'Policy configuration and testing',
+                        commands: [
+                            {
+                                cmd: 'show running security-policy',
+                                description: 'Displays the currently active security policy rules with match criteria, actions, and logging settings for policy analysis.',
+                                privilege: 'User',
+                                category: 'Policy',
+                                status: 'Active',
+                                example: {
+                                    command: 'show running security-policy',
+                                    output: `
+Rules:
+  Rule Name: allow-http-outbound
+    Source Zone: trust
+    Destination Zone: untrust
+    Application: web-Browse
+    Service: service-http, service-https
+    Action: allow
+    Logging: yes
+`
+                                }
+                            },
+                            {
+                                cmd: 'test security-policy-match',
+                                description: 'Tests which security policy rule would match specific traffic parameters including source, destination, application, and user.',
+                                privilege: 'User',
+                                category: 'Testing',
+                                status: 'Active',
+                                example: {
+                                    command: 'test security-policy-match source 192.168.10.5 destination 8.8.8.8 application web-Browse',
+                                    output: `
+*** Policy Match Result ***
+Rule Name: allow-http-outbound
+Source Zone: trust
+Destination Zone: untrust
+Application: web-Browse
+Service: service-http, service-https
+Action: allow
+`
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            'checkpoint': {
+                name: 'Check Point Software',
+                category: 'firewall',
+                description: 'Industry-leading cybersecurity solutions with unified threat management, advanced threat prevention, and centralized security management.',
+                logo_bg: 'linear-gradient(135deg, #FF0000, #CC0000)',
+                documentation: 'https://sc1.checkpoint.com/documents/latest/APIs/',
+                command_count: 38,
+                category_count: 4,
+                commands: {
+                    'System Management': {
+                        subtitle: 'Gateway and management operations',
+                        commands: [
+                            {
+                                cmd: 'cpstat fw',
+                                description: 'Displays comprehensive firewall statistics including connection counts, throughput metrics, and resource utilization for performance monitoring.',
+                                privilege: 'Admin',
+                                category: 'Monitoring',
+                                status: 'Active',
+                                example: {
+                                    command: 'cpstat fw',
+                                    output: `
++-------------------------------------------------------------+
+|FireWall                                                     |
++-------------------------------------------------------------+
+|Connections: 12345 (peak 20000)                               |
+|Throughput:  100 Mbps in, 50 Mbps out                         |
+|CPU Usage:   25%                                             |
+|Memory:      50% Used                                        |
++-------------------------------------------------------------+
+`
+                                }
+                            },
+                            {
+                                cmd: 'fw stat',
+                                description: 'Shows current firewall status, policy installation state, and basic operational statistics for quick health checks.',
+                                privilege: 'User',
+                                category: 'Monitoring', 
+                                status: 'Active',
+                                example: {
+                                    command: 'fw stat',
+                                    output: `
+FireWall:       [OK]
+Policy:         Standard (Installed)
+Connections:    12345
+Packets in:     123456789
+Packets out:    987654321
+`
+                                }
+                            },
+                            {
+                                cmd: 'cphaprob state',
+                                description: 'Checks the current state of Check Point High Availability cluster members and synchronization status.',
+                                privilege: 'User',
+                                category: 'HA Management',
+                                status: 'Active',
+                                example: {
+                                    command: 'cphaprob state',
+                                    output: `
+Cluster mode:   High Availability (Active/Standby)
+Member ID:      1 (Local)
+State:          Active
+Sync State:     OK
+`
+                                }
+                            }
+                        ]
+                    },
+                    'Policy Operations': {
+                        subtitle: 'Security policy management',
+                        commands: [
+                            {
+                                cmd: 'fw fetch localhost',
+                                description: 'Downloads the security policy from the management server to the local gateway for installation and activation.',
+                                privilege: 'Admin',
+                                category: 'Policy',
+                                status: 'Active',
+                                example: {
+                                    command: 'fw fetch localhost',
+                                    output: `
+Fetching policy from management server...
+Policy 'Standard' successfully fetched.
+`
+                                }
+                            },
+                            {
+                                cmd: 'fw load /opt/CPsuite-R80/fw1/conf/local.W',
+                                description: 'Loads a specific security policy file into the firewall kernel for immediate enforcement.',
+                                privilege: 'Admin',
+                                category: 'Policy',
+                                status: 'Active',
+                                example: {
+                                    command: 'fw load /opt/CPsuite-R80/fw1/conf/local.W',
+                                    output: `
+Loading policy from /opt/CPsuite-R80/fw1/conf/local.W...
+Policy loaded successfully.
+`
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            'crowdstrike': {
+                name: 'CrowdStrike Falcon',
+                category: 'endpoint',
+                description: 'Cloud-native endpoint protection platform with AI-powered threat detection, incident response, and threat hunting capabilities.',
+                logo_bg: 'linear-gradient(135deg, #FF0000, #8B0000)',
+                documentation: 'https://falcon.crowdstrike.com/documentation/',
+                command_count: 52,
+                category_count: 5,
+                commands: {
+                    'Agent Management': {
+                        subtitle: 'Falcon sensor operations',
+                        commands: [
+                            {
+                                cmd: 'sudo /opt/CrowdStrike/falconctl -g --cid',
+                                description: 'Retrieves the Customer ID (CID) that uniquely identifies your CrowdStrike organization and links the sensor to your tenant.',
+                                privilege: 'Admin',
+                                category: 'Configuration',
+                                status: 'Active',
+                                example: {
+                                    command: 'sudo /opt/CrowdStrike/falconctl -g --cid',
+                                    output: `
+cid: 1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d
+`
+                                }
+                            },
+                            {
+                                cmd: 'sudo /opt/CrowdStrike/falconctl -g --aid',
+                                description: 'Gets the Agent ID (AID) that uniquely identifies this specific endpoint within your CrowdStrike environment.',
+                                privilege: 'Admin',
+                                category: 'Information',
+                                status: 'Active',
+                                example: {
+                                    command: 'sudo /opt/CrowdStrike/falconctl -g --aid',
+                                    output: `
+aid: 1234567890abcdef1234567890abcdef
+`
+                                }
+                            },
+                            {
+                                cmd: 'sudo /opt/CrowdStrike/falconctl -g --version',
+                                description: 'Displays the current version of the Falcon sensor installed on the endpoint for inventory and update management.',
+                                privilege: 'User',
+                                category: 'Information',
+                                status: 'Active',
+                                example: {
+                                    command: 'sudo /opt/CrowdStrike/falconctl -g --version',
+                                    output: `
+version: 6.30.12304.0
+`
+                                }
+                            }
+                        ]
+                    },
+                    'Real-Time Response': {
+                        subtitle: 'Live endpoint investigation',
+                        commands: [
+                            {
+                                cmd: 'runscript -Raw=Get-Process',
+                                description: 'Executes PowerShell to retrieve detailed information about all running processes including PID, CPU usage, and memory consumption.',
+                                privilege: 'RTR Admin',
+                                category: 'Investigation',
+                                status: 'Active',
+                                example: {
+                                    command: 'runscript -Raw="Get-Process | Select-Object -First 5 Name,Id,CPU"',
+                                    output: `
+Name        Id   CPU
+----        --   ---
+System      4    0.00
+smss        292  0.00
+csrss       400  0.01
+wininit     456  0.00
+services    540  0.03
+`
+                                }
+                            },
+                            {
+                                cmd: 'netstat -an',
+                                description: 'Displays all active network connections and listening ports to identify potential malicious network activity.',
+                                privilege: 'RTR User',
+                                category: 'Investigation',
+                                status: 'Active',
+                                example: {
+                                    command: 'netstat -an',
+                                    output: `
+Active Connections
+
+  Proto  Local Address          Foreign Address        State
+  TCP    0.0.0.0:135            0.0.0.0:0              LISTENING
+  TCP    0.0.0.0:445            0.0.0.0:0              LISTENING
+  TCP    192.168.1.10:49700     52.1.2.3:443           ESTABLISHED
+`
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            'splunk': {
+                name: 'Splunk Enterprise',
+                category: 'siem',
+                description: 'Security information and event management platform with advanced analytics, threat detection, and security orchestration capabilities.',
+                logo_bg: 'linear-gradient(135deg, #FF6600, #FF8C00)',
+                documentation: 'https://docs.splunk.com/Documentation/Splunk',
+                command_count: 67,
+                category_count: 7,
+                commands: {
+                    'Search Operations': {
+                        subtitle: 'Data search and analysis',
+                        commands: [
+                            {
+                                cmd: 'index=security sourcetype=firewall | head 100',
+                                description: 'Searches the security index for firewall logs and returns the first 100 events for initial data exploration and validation.',
+                                privilege: 'User',
+                                category: 'Search',
+                                status: 'Active',
+                                example: {
+                                    command: 'index=security sourcetype=firewall | head 2',
+                                    output: `
+_time=2023-10-26T14:30:00.000-0400 host=firewall-01 source=/var/log/firewall.log sourcetype=firewall index=security
+src_ip=10.1.1.10 dst_ip=192.168.50.100 action=ALLOW user=john.doe proto=TCP dst_port=80
+_time=2023-10-26T14:30:01.000-0400 host=firewall-02 source=/var/log/firewall.log sourcetype=firewall index=security
+src_ip=172.16.0.5 dst_ip=1.2.3.4 action=DENY user=guest proto=UDP dst_port=53
+`
+                                }
+                            },
+                            {
+                                cmd: 'index=* earliest=-24h | stats count by sourcetype',
+                                description: 'Generates statistics showing event counts by source type over the last 24 hours for data ingestion monitoring.',
+                                privilege: 'User',
+                                category: 'Analytics',
+                                status: 'Active',
+                                example: {
+                                    command: 'index=* earliest=-24h | stats count by sourcetype | sort -count',
+                                    output: `
+sourcetype         count
+-------------      ------
+firewall           150000
+syslog             80000
+web_access         50000
+windows_eventlog   30000
+`
+                                }
+                            }
+                        ]
+                    },
+                    'System Administration': {
+                        subtitle: 'Splunk system management',
+                        commands: [
+                            {
+                                cmd: './splunk status',
+                                description: 'Checks the current status of all Splunk services and processes to verify system health and availability.',
+                                privilege: 'Admin',
+                                category: 'Monitoring',
+                                status: 'Active',
+                                example: {
+                                    command: './splunk status',
+                                    output: `
+Splunkd:                                                     [enabled]
+Splunkweb:                                                   [enabled]
+Splunk process management:                                   [enabled]
+`
+                                }
+                            },
+                            {
+                                cmd: './splunk show deploy-poll',
+                                description: 'Displays the deployment polling configuration and status for managed Splunk instances in a distributed environment.',
+                                privilege: 'Admin',
+                                category: 'Management',
+                                status: 'Active',
+                                example: {
+                                    command: './splunk show deploy-poll',
+                                    output: `
+Deployment server host: deploy-server.example.com:8089
+Last successful check: 2023-10-26 14:45:00
+Next check: 2023-10-26 14:50:00
+`
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            'fortinet': {
+                name: 'Fortinet FortiGate',
+                category: 'firewall',
+                description: 'Integrated security platform combining firewall, intrusion prevention, antivirus, VPN, and web filtering in a unified solution.',
+                logo_bg: 'linear-gradient(135deg, #0066CC, #004499)',
+                documentation: 'https://docs.fortinet.com/fortigate',
+                command_count: 41,
+                category_count: 5,
+                commands: {
+                    'System Operations': {
+                        subtitle: 'FortiOS system management',
+                        commands: [
+                            {
+                                cmd: 'get system status',
+                                description: 'Displays comprehensive system information including version, uptime, hardware details, and current resource utilization.',
+                                privilege: 'User',
+                                category: 'Monitoring',
+                                status: 'Active',
+                                example: {
+                                    command: 'get system status',
+                                    output: `
+Version: FortiGate-VM64-KVM v7.0.5,build0291,210817 (GA)
+Hostname: FG-VM01
+Uptime: 15 days 2 hours 30 min
+Operation Mode: NAT
+Current virtual domain: root
+`
+                                }
+                            },
+                            {
+                                cmd: 'diagnose sys top',
+                                description: 'Shows real-time system performance metrics including CPU usage, memory consumption, and running processes.',
+                                privilege: 'Admin',
+                                category: 'Monitoring',
+                                status: 'Active',
+                                example: {
+                                    command: 'diagnose sys top',
+                                    output: `
+Run Time: 0 days, 2 hours, 10 min, 15 sec
+0U, 0N, 0I, 100S, 0T, 0W, 0C, 0H, 0E, 0R
+Total number of processes: 65
+CPU states: 0% user, 0% system, 0% nice, 100% idle
+Memory states: 1234M total, 567M used (46%), 667M free (54%)
+`
+                                }
+                            }
+                        ]
+                    },
+                    'Network Diagnostics': {
+                        subtitle: 'Network troubleshooting tools',
+                        commands: [
+                            {
+                                cmd: 'get router info routing-table all',
+                                description: 'Displays the complete routing table with all routes, next-hops, and metrics for network troubleshooting.',
+                                privilege: 'User',
+                                category: 'Networking',
+                                status: 'Active',
+                                example: {
+                                    command: 'get router info routing-table all',
+                                    output: `
+Codes: K - kernel, C - connected, S - static, R - RIP, B - BGP
+       O - OSPF, IA - OSPF inter area, N1 - OSPF NSSA external type 1
+       N2 - OSPF NSSA external type 2, E1 - OSPF external type 1
+       E2 - OSPF external type 2, i - IS-IS, L1 - IS-IS level-1
+       L2 - IS-IS level-2, SU - IS-IS summary, * - candidate default
+
+S* 0.0.0.0/0 [10/0] via 1.1.1.1, port1
+C       10.0.0.0/24 is directly connected, internal
+C       192.168.1.0/24 is directly connected, port2
+`
+                                }
+                            },
+                            {
+                                cmd: 'diagnose sniffer packet any "host 8.8.8.8" 4',
+                                description: 'Captures network packets matching the specified filter criteria for detailed traffic analysis and troubleshooting.',
+                                privilege: 'Admin',
+                                category: 'Troubleshooting',
+                                status: 'Active',
+                                example: {
+                                    command: 'diagnose sniffer packet any "host 8.8.8.8" 4',
+                                    output: `
+interfaces=[any]
+filters=[host 8.8.8.8]
+2.000000 192.168.1.10.51234 -> 8.8.8.8.53: udp 30
+2.000100 8.8.8.8.53 -> 192.168.1.10.51234: udp 60
+`
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            'cisco-asa': {
+                name: 'Cisco ASA',
+                category: 'firewall',
+                description: 'Adaptive Security Appliance providing comprehensive network security with firewall, VPN, and intrusion prevention capabilities.',
+                logo_bg: 'linear-gradient(135deg, #1BA0D7, #0E4F99)',
+                documentation: 'https://www.cisco.com/c/en/us/support/security/asa-5500-series-next-generation-firewalls/tsd-products-support-series-home.html',
+                command_count: 59,
+                category_count: 6,
+                commands: {
+                    'System Information': {
+                        subtitle: 'Device status and configuration',
+                        commands: [
+                            {
+                                cmd: 'show version',
+                                description: 'Displays detailed system information including software version, hardware model, uptime, memory usage, and licensing details.',
+                                privilege: 'User',
+                                category: 'Monitoring',
+                                status: 'Active',
+                                example: {
+                                    command: 'show version',
+                                    output: `
+Cisco Adaptive Security Appliance Software Version 9.14(2)
+Device Manager Version 7.14(1)
+Hardware:   ASA5506-X, 4096 MB RAM, CPU Atom C2000 series 4 cores
+Uptime: 2 days 5 hours
+`
+                                }
+                            },
+                            {
+                                cmd: 'show running-config',
+                                description: 'Shows the complete active configuration currently running on the ASA device for configuration review and backup.',
+                                privilege: 'Admin',
+                                category: 'Configuration',
+                                status: 'Active',
+                                example: {
+                                    command: 'show running-config | include interface',
+                                    output: `
+interface GigabitEthernet1/1
+ nameif outside
+ security-level 0
+ ip address 203.0.113.1 255.255.255.0
+interface GigabitEthernet1/2
+ nameif inside
+ security-level 100
+ ip address 192.168.1.1 255.255.255.0
+`
+                                }
+                            },
+                            {
+                                cmd: 'show memory',
+                                description: 'Displays current memory utilization including free and used memory blocks for performance monitoring.',
+                                privilege: 'User',
+                                category: 'Monitoring',
+                                status: 'Active',
+                                example: {
+                                    command: 'show memory',
+                                    output: `
+Memory usage:
+  Total:         4096 MBytes
+  Used:          1500 MBytes (36%)
+  Free:          2596 MBytes (64%)
+`
+                                }
+                            }
+                        ]
+                    },
+                    'Access Control': {
+                        subtitle: 'Security policy and ACL management',
+                        commands: [
+                            {
+                                cmd: 'show access-list',
+                                description: 'Lists all configured access control lists with their rules, hit counts, and current status for security policy review.',
+                                privilege: 'User',
+                                category: 'Security',
+                                status: 'Active',
+                                example: {
+                                    command: 'show access-list outside_access_in',
+                                    output: `
+access-list outside_access_in extended permit tcp any host 192.168.1.100 eq www (hitcnt=12345)
+access-list outside_access_in extended permit tcp any host 192.168.1.100 eq https (hitcnt=6789)
+access-list outside_access_in extended deny ip any any (hitcnt=0)
+`
+                                }
+                            },
+                            {
+                                cmd: 'show conn count',
+                                description: 'Displays the current number of active connections through the firewall for capacity planning and monitoring.',
+                                privilege: 'User',
+                                category: 'Monitoring',
+                                status: 'Active',
+                                example: {
+                                    command: 'show conn count',
+                                    output: `
+12345 in use, 200000 most used
+`
+                                }
+                            }
+                        ]
+                    },
+                    'VPN Operations': {
+                        subtitle: 'VPN tunnel management',
+                        commands: [
+                            {
+                                cmd: 'show vpn-sessiondb',
+                                description: 'Shows all active VPN sessions including user information, connection time, and data transfer statistics.',
+                                privilege: 'User',
+                                category: 'VPN',
+                                status: 'Active',
+                                example: {
+                                    command: 'show vpn-sessiondb remote',
+                                    output: `
+Session Type: AnyConnect Clientless VPN
+
+Username     : user1
+Index        : 1
+Public IP    : 203.0.113.5
+Private IP   : 10.10.10.10
+Login Time   : 14:00:00 EDT Wed Jun 4 2025
+Duration     : 0h:15m:30s
+Tx Packets   : 1234
+Rx Packets   : 5678
+`
+                                }
+                            },
+                            {
+                                cmd: 'show crypto ipsec sa',
+                                description: 'Displays IPSec security associations showing tunnel status, encryption algorithms, and traffic counters.',
+                                privilege: 'User',
+                                category: 'VPN',
+                                status: 'Active',
+                                example: {
+                                    command: 'show crypto ipsec sa',
+                                    output: `
+interface: outside
+    Crypto map tag: VPN_MAP, seq num: 1, local addr: 203.0.113.1
+
+      local ident (addr/mask/prot/port): (192.168.1.0/255.255.255.0/0/0)
+      remote ident (addr/mask/prot/port): (172.16.0.0/255.255.255.0/0/0)
+      current_peer: 203.0.113.20
+      conn id: 1001, flow_id: 1, sa_type: L2L_VPN
+      current_peer: 203.0.113.20 on outside
+      local crypto endpt.: 203.0.113.1, remote crypto endpt.: 203.0.113.20
+      current outbound spi: 0x12345678 (305419896)
+      inbound esp sas:
+        spi: 0x87654321 (2271560481)
+        transform: esp-aes-256 esp-sha-256
+        in use settings ={AIO, }
+        slot: 0, conn_id: 1001, crypto_map: VPN_MAP
+        sa timing: remaining key lifetime (kB/sec): 4607999/4608000
+        replay detection support: Y
+      outbound esp sas:
+        spi: 0x12345678 (305419896)
+        transform: esp-aes-256 esp-sha-256
+        in use settings ={AIO, }
+        slot: 0, conn_id: 1001, crypto_map: VPN_MAP
+        sa timing: remaining key lifetime (kB/sec): 4607999/4608000
+        replay detection support: Y
+`
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        };
+
+        // Initialize the application
+        function initializeApp() {
+            populateVendorGrid();
+            setupEventListeners();
+            applySavedTheme(); // Apply theme from localStorage
+        }
+
+        // Populate vendor grid
+        function populateVendorGrid() {
+            const vendorGrid = document.getElementById('vendorGrid');
+            vendorGrid.innerHTML = '';
+
+            Object.keys(securityPlatforms).forEach(vendorKey => {
+                const vendor = securityPlatforms[vendorKey];
+                const vendorCard = createVendorCard(vendorKey, vendor);
+                vendorGrid.appendChild(vendorCard);
+            });
+        }
+
+        // Create vendor card
+        function createVendorCard(vendorKey, vendor) {
+            const card = document.createElement('div');
+            card.className = 'vendor-card';
+            card.dataset.vendor = vendorKey;
+            card.dataset.category = vendor.category;
+
+            const categoryLabels = {
+                'firewall': 'Next-Gen Firewall',
+                'endpoint': 'Endpoint Security',
+                'siem': 'SIEM & Analytics',
+                'network': 'Network Security',
+                'cloud': 'Cloud Security'
+            };
+
+            card.innerHTML = `
+                <div class="vendor-header">
+                    <div class="vendor-logo" style="background: ${vendor.logo_bg}">
+                        ${vendor.name.split(' ').map(word => word[0]).join('').substring(0, 2)}
+                    </div>
+                    <div class="vendor-info">
+                        <h3>${vendor.name}</h3>
+                        <span class="vendor-category">${categoryLabels[vendor.category] || vendor.category}</span>
+                    </div>
+                </div>
+                <p class="vendor-description">${vendor.description}</p>
+                <div class="vendor-stats">
+                    <div class="stats-item">
+                        <span><i class="fas fa-clipboard-list"></i></span>
+                        <span>${vendor.command_count} Commands</span>
+                    </div>
+                    <div class="stats-item">
+                        <span><i class="fas fa-folder-open"></i></span>
+                        <span>${vendor.category_count} Categories</span>
+                    </div>
+                    <a href="${vendor.documentation}" target="_blank" class="doc-link">
+                        <span><i class="fas fa-book"></i></span>
+                        <span>Documentation</span>
+                    </a>
+                </div>
+            `;
+
+            card.addEventListener('click', () => showCommands(vendorKey));
+            return card;
+        }
+
+        // Show commands for selected vendor
+        function showCommands(vendorKey) {
+            const vendor = securityPlatforms[vendorKey];
+            const vendorSection = document.getElementById('vendorSection');
+            const commandsSection = document.getElementById('commandsSection');
+            const currentVendorTitle = document.getElementById('currentVendorTitle');
+            const commandCategories = document.getElementById('commandCategories');
+
+            // Update header
+            currentVendorTitle.innerHTML = `
+                <div class="vendor-logo" style="background: ${vendor.logo_bg}; width: 40px; height: 40px; font-size: 16px;">
+                    ${vendor.name.split(' ').map(word => word[0]).join('').substring(0, 2)}
+                </div>
+                <div>
+                    <h2>${vendor.name}</h2>
+                    <a href="${vendor.documentation}" target="_blank" class="doc-link">
+                        <i class="fas fa-book"></i>
+                        <span>View Official Documentation</span>
+                    </a>
+                </div>
+            `;
+
+            // Populate command categories
+            commandCategories.innerHTML = '';
+            Object.keys(vendor.commands).forEach(categoryName => {
+                const category = vendor.commands[categoryName];
+                const categorySection = createCategorySection(categoryName, category);
+                commandCategories.appendChild(categorySection);
+            });
+
+            // Switch views
+            vendorSection.style.display = 'none';
+            commandsSection.classList.add('active');
+        }
+
+        // Create category section
+        function createCategorySection(categoryName, category) {
+            const section = document.createElement('div');
+            section.className = 'category-section';
+
+            const commandsHtml = category.commands.map(command => {
+                // Generate a safe ID for the example section
+                const safeCommandId = command.cmd.replace(/[^\w-]/g, '_'); // Replace non-alphanumeric with underscore
+
+                const exampleSection = command.example ? `
+                    <div class="example-section" id="example-${safeCommandId}" style="display:none;">
+                        <h4>Example Command:</h4>
+                        <pre><code>${command.example.command}</code></pre>
+                        <h4>Expected Output:</h4>
+                        <pre class="command-output"><code>${command.example.output.trim()}</code></pre>
+                    </div>
+                ` : '';
+
+                const toggleButton = command.example ? `
+                    <button class="action-btn toggle-example-btn" 
+                            onclick="toggleExample('${safeCommandId}', this)">
+                        <i class="fas fa-eye"></i> Show Example
+                    </button>
+                ` : '';
+
+                return `
+                    <div class="command-item">
+                        <div class="command-header">
+                            <div class="command-code">${command.cmd}</div>
+                            <div class="command-actions">
+                                <button class="action-btn" onclick="copyCommand('${command.cmd.replace(/'/g, "\\'")}', event)"><i class="far fa-copy"></i> Copy</button>
+                                <button class="action-btn" onclick="favoriteCommand('${command.cmd}', event)"><i class="far fa-star"></i> Favorite</button>
+                            </div>
+                        </div>
+                        <div class="command-description">${command.description}</div>
+                        <div class="command-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Privilege:</span>
+                                <span class="detail-value privilege-${command.privilege.toLowerCase().replace(/\s/g, '-')}">${command.privilege}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Category:</span>
+                                <span class="detail-value">${command.category}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Status:</span>
+                                <span class="status-badge status-${command.status.toLowerCase()}">${command.status}</span>
+                            </div>
+                        </div>
+                        ${toggleButton}
+                        ${exampleSection}
+                    </div>
+                `;
+            }).join('');
+
+            section.innerHTML = `
+                <div class="category-header">
+                    <h3 class="category-title">${categoryName}</h3>
+                    <p class="category-subtitle">${category.subtitle}</p>
+                </div>
+                <div class="commands-list">
+                    ${commandsHtml}
+                </div>
+            `;
+
+            return section;
+        }
+
+        // Toggle example visibility
+        function toggleExample(commandId, button) {
+            const exampleDiv = document.getElementById(`example-${commandId}`);
+            if (exampleDiv) {
+                if (exampleDiv.style.display === 'none' || exampleDiv.style.display === '') {
+                    exampleDiv.style.display = 'block';
+                    button.innerHTML = '<i class="fas fa-eye-slash"></i> Hide Example';
+                } else {
+                    exampleDiv.style.display = 'none';
+                    button.innerHTML = '<i class="fas fa-eye"></i> Show Example';
+                }
+            }
+        }
+
+        // Show vendor section
+        function showVendorSection() {
+            const vendorSection = document.getElementById('vendorSection');
+            const commandsSection = document.getElementById('commandsSection');
+
+            commandsSection.classList.remove('active');
+            setTimeout(() => {
+                vendorSection.style.display = 'block';
+            }, 300);
+        }
+
+        // Copy command to clipboard
+        function copyCommand(command, event) { // Added event parameter
+            navigator.clipboard.writeText(command).then(() => {
+                // Visual feedback
+                const button = event.target; // event.target is now defined
+                const originalInnerHTML = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                button.style.background = 'var(--success)';
+                button.style.borderColor = 'var(--success)';
+                button.style.color = 'white';
+
+                setTimeout(() => {
+                    button.innerHTML = originalInnerHTML;
+                    button.style.background = '';
+                    button.style.borderColor = '';
+                    button.style.color = '';
+                }, 2000);
+            });
+        }
+
+        // Favorite command (placeholder function)
+        function favoriteCommand(command, event) { // Added event parameter
+            console.log('Favorited:', command);
+            // Here you would implement favorite functionality
+            const button = event.target; // event.target is now defined
+            button.classList.toggle('favorited'); // Add a class for visual feedback
+            if (button.classList.contains('favorited')) {
+                button.style.color = 'gold'; // Or use a different class/style
+            } else {
+                button.style.color = ''; // Reset color
+            }
+        }
+
+        // --- Theme Toggle Logic ---
+        function toggleTheme() {
+            const body = document.body;
+            body.classList.toggle('light-mode');
+            const isLightMode = body.classList.contains('light-mode');
+            localStorage.setItem('theme', isLightMode ? 'light' : 'dark');
+            updateThemeToggleButton(isLightMode);
+        }
+
+        function updateThemeToggleButton(isLightMode) {
+            const themeIcon = document.getElementById('themeIcon');
+            const themeText = document.getElementById('themeText');
+            if (isLightMode) {
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+                themeText.textContent = 'Light Mode';
+            } else {
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+                themeText.textContent = 'Dark Mode';
+            }
+        }
+
+        function applySavedTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            // Check for system preference if no theme is saved
+            if (savedTheme === null) {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+                    document.body.classList.add('light-mode');
+                    updateThemeToggleButton(true);
+                    return;
+                }
+            }
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-mode');
+            }
+            updateThemeToggleButton(savedTheme === 'light'); // Set initial button state
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Filter chips
+            const filterChips = document.querySelectorAll('.filter-chip');
+            filterChips.forEach(chip => {
+                chip.addEventListener('click', () => {
+                    filterChips.forEach(c => c.classList.remove('active'));
+                    chip.classList.add('active');
+                    const filter = chip.dataset.filter;
+                    filterVendors(filter);
+                });
+            });
+
+            // Global search - now in main content
+            const globalSearch = document.getElementById('globalSearch');
+            // Check if globalSearch element exists before adding event listener
+            if (globalSearch) { 
+                globalSearch.addEventListener('input', (e) => {
+                    const query = e.target.value.toLowerCase();
+                    searchContent(query);
+                });
+            } else {
+                console.warn("Global search input with ID 'globalSearch' not found. Search functionality might be limited.");
+            }
+
+            // Theme toggle button
+            document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);
+        }
+
+        // Filter vendors by category
+        function filterVendors(category) {
+            const vendorCards = document.querySelectorAll('.vendor-card');
+            
+            vendorCards.forEach(card => {
+                if (category === 'all' || card.dataset.category === category) {
+                    card.style.display = 'block';
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, 100);
+                } else {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+                    setTimeout(() => {
+                        card.style.display = 'none';
+                    }, 300);
+                }
+            });
+        }
+
+        // Search content
+        function searchContent(query) {
+            if (!query) {
+                const vendorCards = document.querySelectorAll('.vendor-card');
+                vendorCards.forEach(card => {
+                    card.style.display = 'block';
+                });
+                return;
+            }
+
+            const vendorCards = document.querySelectorAll('.vendor-card');
+            vendorCards.forEach(card => {
+                const vendorKey = card.dataset.vendor;
+                const vendor = securityPlatforms[vendorKey];
+                
+                const searchableText = [
+                    vendor.name,
+                    vendor.description,
+                    ...Object.values(vendor.commands).flatMap(category => 
+                        category.commands.map(cmd => cmd.cmd + ' ' + cmd.description + (cmd.example ? ' ' + cmd.example.command + ' ' + cmd.example.output : ''))
+                    )
+                ].join(' ').toLowerCase();
+
+                if (searchableText.includes(query)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Initialize the application when the page loads
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+</body>
+</html>
